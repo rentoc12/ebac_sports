@@ -3,6 +3,10 @@ import Header from './components/Header'
 import Produtos from './containers/Produtos'
 
 import { GlobalStyle } from './styles'
+import { Provider, useDispatch, useSelector } from 'react-redux'
+import { RootReducer, store } from './store'
+import { adicionarFavorito } from './store/reducers/favoritos'
+import { adicionar } from './store/reducers/carrinho'
 
 export type Produto = {
   id: number
@@ -12,9 +16,9 @@ export type Produto = {
 }
 
 function App() {
+  const dispatch = useDispatch()
   const [produtos, setProdutos] = useState<Produto[]>([])
-  const [carrinho, setCarrinho] = useState<Produto[]>([])
-  const [favoritos, setFavoritos] = useState<Produto[]>([])
+  const favoritos = useSelector((state: RootReducer) => state.favorito.itens)
 
   useEffect(() => {
     fetch('https://ebac-fake-api.vercel.app/api/ebac_sports')
@@ -22,36 +26,19 @@ function App() {
       .then((res) => setProdutos(res))
   }, [])
 
-  function adicionarAoCarrinho(produto: Produto) {
-    if (carrinho.find((p) => p.id === produto.id)) {
-      alert('Item já adicionado')
-    } else {
-      setCarrinho([...carrinho, produto])
-    }
-  }
-
-  function favoritar(produto: Produto) {
-    if (favoritos.find((p) => p.id === produto.id)) {
-      const favoritosSemProduto = favoritos.filter((p) => p.id !== produto.id)
-      setFavoritos(favoritosSemProduto)
-    } else {
-      setFavoritos([...favoritos, produto])
-    }
-  }
-
   return (
-    <>
+    <Provider store={store}>
       <GlobalStyle />
       <div className="container">
-        <Header favoritos={favoritos} itensNoCarrinho={carrinho} />
+        <Header />
         <Produtos
           produtos={produtos}
           favoritos={favoritos}
-          favoritar={favoritar}
-          adicionarAoCarrinho={adicionarAoCarrinho}
+          favoritar={(produto) => dispatch(adicionarFavorito(produto))}
+          adicionarAoCarrinho={(produto) => dispatch(adicionar(produto))}
         />
       </div>
-    </>
+    </Provider>
   )
 }
 

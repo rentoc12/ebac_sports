@@ -3,8 +3,8 @@ import * as S from './styles'
 
 type Props = {
   produto: ProdutoType
-  aoComprar: (produto: ProdutoType) => void
   favoritar: (produto: ProdutoType) => void
+  aoComprar: (produto: ProdutoType) => void
   estaNosFavoritos: boolean
 }
 
