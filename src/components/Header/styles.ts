@@ -1,45 +1,69 @@
 import styled from 'styled-components'
-import { cores } from '../../styles'
+import { colors } from '../../styles/colors'
 
-export const Header = styled.header`
-  background-image: linear-gradient(
-    45deg,
-    ${cores.corPrincipal},
-    ${cores.corSecundaria}
-  );
-  margin: 80px 0;
-  padding: 16px 24px;
+// Header para página Home
+export const Container = styled.header`
+  background-color: ${colors.secondary};
+  padding: 40px 0;
+  text-align: center;
+`
+
+// Header para página Restaurant (3 elementos)
+export const ContainerRestaurant = styled.header`
+  background-color: ${colors.secondary};
+  padding: 40px 0;
+`
+
+export const HeaderContent = styled.div`
+  max-width: 1024px;
+  width: 100%;
+  margin: 0 auto;
+  padding: 0 16px;
   display: flex;
-  border-radius: 6px;
+  justify-content: space-between;
   align-items: center;
 
-  h1 {
-    font-size: 18px;
-    flex: 1;
-    font-style: italic;
-    color: ${cores.corFundo};
+  ${Container} & {
+    justify-content: center;
   }
+`
 
-  div {
-    display: flex;
-    align-items: center;
+export const Logo = styled.h1`
+  font-size: 36px;
+  font-weight: bold;
+
+  a {
+    text-decoration: none;
+    color: ${colors.primary};
 
     img {
-      width: 18px;
-      margin-right: 8px;
-      margin-left: 16px;
-    }
-
-    span {
-      color: ${cores.corFundo};
+      height: 58px;
+      width: auto;
     }
   }
 
-  @media (max-width: 768px) {
-    flex-direction: column;
+  /* Centralizar logo quando estiver no meio (página restaurant) */
+  ${ContainerRestaurant} & {
+    flex: 1;
+    text-align: center;
+  }
+`
 
-    div {
-      margin-top: 16px;
-    }
+export const CartInfo = styled.div`
+  font-weight: bold;
+  font-size: 18px;
+  color: ${colors.primary};
+  min-width: 200px;
+  text-align: right;
+`
+
+export const Nav = styled.nav`
+  min-width: 200px;
+
+  a {
+    text-decoration: none;
+    color: ${colors.primary};
+    font-size: 18px;
+    font-weight: bold;
   }
 `

@@ -1,34 +1,59 @@
-import * as S from './styles'
+import { Link } from 'react-router-dom'
+import { useLocation } from 'react-router-dom'
+import { useAppDispatch, useAppSelector } from '../../store/hooks'
+import { openCart, selectCartItemsCount } from '../../store/reducers/cart'
+import {
+  Container,
+  ContainerRestaurant,
+  Logo,
+  CartInfo,
+  Nav,
+  HeaderContent
+} from './styles'
+import logoImg from '../../assets/images/logo.png'
 
-import { Produto } from '../../App'
+const Header = () => {
+  const location = useLocation()
+  const dispatch = useAppDispatch()
+  const itemsCount = useAppSelector(selectCartItemsCount)
+  const isRestaurantPage = location.pathname.includes('/restaurant/')
 
-import cesta from '../../assets/cesta.png'
-import { paraReal } from '../Produto'
-import { useSelector } from 'react-redux'
-import { RootReducer } from '../../store'
+  const handleOpenCart = () => {
+    dispatch(openCart())
+  }
 
-type Props = {
-  favoritos: Produto[]
-}
+  if (isRestaurantPage) {
+    // Header para página do restaurante
+    return (
+      <ContainerRestaurant>
+        <HeaderContent>
+          <Nav>
+            <Link to="/">Restaurantes</Link>
+          </Nav>
+          <Logo>
+            <Link to="/">
+              <img src={logoImg} alt="efood" />
+            </Link>
+          </Logo>
+          <CartInfo onClick={handleOpenCart} style={{ cursor: 'pointer' }}>
+            {itemsCount} produto(s) no carrinho
+          </CartInfo>
+        </HeaderContent>
+      </ContainerRestaurant>
+    )
+  }
 
-const Header = ({ favoritos }: Props) => {
-  const itens = useSelector((state: RootReducer) => state.carrinho.itens)
-  const valorTotal = itens.reduce((acc, item) => {
-    acc += item.preco
-    return acc
-  }, 0)
-
+  // Header para home
   return (
-    <S.Header>
-      <h1>EBAC Sports</h1>
-      <div>
-        <span>{favoritos.length} favoritos</span>
-        <img src={cesta} />
-        <span>
-          {itens.length} itens, valor total: {paraReal(valorTotal)}
-        </span>
-      </div>
-    </S.Header>
+    <Container>
+      <HeaderContent>
+        <Logo>
+          <Link to="/">
+            <img src={logoImg} alt="efood" />
+          </Link>
+        </Logo>
+      </HeaderContent>
+    </Container>
   )
 }
 
