@@ -79,7 +79,11 @@ export const ConfirmationContainer = styled.div`
   padding: 0 8px;
 
   h2 {
-    color: ${colors.secondary};
+    display: flex;
+    justify-content: center;
+    text-align: center;
+    color: ${colors.black};
+    color: ${colors.black};
     font-size: 18px;
     font-weight: bold;
     margin-bottom: 16px;
@@ -87,7 +91,10 @@ export const ConfirmationContainer = styled.div`
 `
 
 export const ConfirmationText = styled.p`
-  color: ${colors.secondary};
+  display: flex;
+  justify-content: center;
+  text-align: center;
+  color: ${colors.black};
   font-size: 14px;
   line-height: 22px;
   margin-bottom: 24px;

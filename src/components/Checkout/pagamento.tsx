@@ -1,24 +1,28 @@
 import { useFormik } from 'formik'
 import * as Yup from 'yup'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
+import { RootState } from '../../store'
 import {
   setPaymentData,
   setOrderId,
-  goToDelivery,
-  selectCartItems,
-  selectCartTotal,
-  selectDeliveryData
+  goToDelivery
 } from '../../store/reducers/cart'
 import { api } from '../../services/api'
 import { Form, InputGroup, Input, ButtonGroup, Button } from './styles'
 import { useState } from 'react'
+import { useNavigate } from 'react-router-dom'
 
 const Payment = () => {
   const dispatch = useAppDispatch()
-  const items = useAppSelector(selectCartItems)
-  const total = useAppSelector(selectCartTotal)
-  const deliveryData = useAppSelector(selectDeliveryData)
+  const navigate = useNavigate()
+  const { items, deliveryData } = useAppSelector(
+    (state: RootState) => state.cart
+  )
+
+  const total = items.reduce((acc, item) => acc + item.preco, 0)
   const [isLoading, setIsLoading] = useState(false)
+
+  const onlyNumbers = (value: string) => value.replace(/\D/g, '')
 
   const formik = useFormik({
     initialValues: {
@@ -32,10 +36,10 @@ const Payment = () => {
       cardOwner: Yup.string().required('Campo obrigatório'),
       cardNumber: Yup.string()
         .required('Campo obrigatório')
-        .matches(/^[0-9]{16}$/, 'Número do cartão inválido'),
+        .matches(/^[0-9]{16}$/, 'Número do cartão deve ter 16 dígitos'),
       cardCode: Yup.string()
         .required('Campo obrigatório')
-        .matches(/^[0-9]{3}$/, 'CVV inválido'),
+        .matches(/^[0-9]{3}$/, 'CVV deve ter 3 dígitos'),
       expiresMonth: Yup.string()
         .required('Campo obrigatório')
         .matches(/^(0[1-9]|1[0-2])$/, 'Mês inválido'),
@@ -44,12 +48,10 @@ const Payment = () => {
         .matches(/^[0-9]{4}$/, 'Ano inválido')
     }),
     onSubmit: async (values) => {
-      console.log('=== SUBMIT INICIADO ===')
-      console.log('Form values:', values)
+      console.log('✅ Formulário enviado', values)
 
       if (!deliveryData) {
-        console.error('Dados de entrega não encontrados!')
-        alert('Dados de entrega não encontrados')
+        alert('Dados de entrega não encontrados. Volte e preencha novamente.')
         return
       }
 
@@ -85,12 +87,21 @@ const Payment = () => {
           }
         }
 
-        console.log('Enviando para API:', checkoutData)
+        console.log('🚀 Enviando para API:', checkoutData)
+
         const response = await api.checkout(checkoutData)
-        console.log('Resposta da API:', response)
-        dispatch(setOrderId(response.orderId))
+
+        console.log('✅ Resposta da API:', response)
+
+        if (response && response.orderId) {
+          dispatch(setOrderId(response.orderId))
+          navigate('/checkout/confirmacao')
+        } else {
+          console.error('⚠️ Resposta inesperada da API:', response)
+          alert('Erro ao processar pedido. Tente novamente.')
+        }
       } catch (error) {
-        console.error('Erro ao finalizar pedido:', error)
+        console.error('❌ Erro ao finalizar pedido:', error)
         alert('Erro ao finalizar pedido. Tente novamente.')
       } finally {
         setIsLoading(false)
@@ -98,6 +109,7 @@ const Payment = () => {
     }
   })
 
+  console.log('🧾 Erros atuais do form:', formik.errors)
   const handleBack = () => {
     dispatch(goToDelivery())
   }
@@ -131,8 +143,11 @@ const Payment = () => {
               type="text"
               autoComplete="cc-number"
               maxLength={16}
+              inputMode="numeric"
               value={formik.values.cardNumber}
-              onChange={formik.handleChange}
+              onChange={(e) =>
+                formik.setFieldValue('cardNumber', onlyNumbers(e.target.value))
+              }
               onBlur={formik.handleBlur}
               className={
                 formik.touched.cardNumber && formik.errors.cardNumber
@@ -150,8 +165,11 @@ const Payment = () => {
               type="text"
               autoComplete="cc-csc"
               maxLength={3}
+              inputMode="numeric"
               value={formik.values.cardCode}
-              onChange={formik.handleChange}
+              onChange={(e) =>
+                formik.setFieldValue('cardCode', onlyNumbers(e.target.value))
+              }
               onBlur={formik.handleBlur}
               className={
                 formik.touched.cardCode && formik.errors.cardCode ? 'error' : ''
@@ -162,16 +180,21 @@ const Payment = () => {
 
         <div style={{ display: 'flex', gap: '34px' }}>
           <InputGroup style={{ flex: 1 }}>
-            <label htmlFor="expiresMonth">Mês de vencimento</label>
+            <label htmlFor="expiresMonth">Mês</label>
             <Input
               id="expiresMonth"
               name="expiresMonth"
               type="text"
-              autoComplete="cc-exp-month"
               maxLength={2}
               placeholder="MM"
+              inputMode="numeric"
               value={formik.values.expiresMonth}
-              onChange={formik.handleChange}
+              onChange={(e) =>
+                formik.setFieldValue(
+                  'expiresMonth',
+                  onlyNumbers(e.target.value)
+                )
+              }
               onBlur={formik.handleBlur}
               className={
                 formik.touched.expiresMonth && formik.errors.expiresMonth
@@ -182,16 +205,18 @@ const Payment = () => {
           </InputGroup>
 
           <InputGroup style={{ flex: 1 }}>
-            <label htmlFor="expiresYear">Ano de vencimento</label>
+            <label htmlFor="expiresYear">Ano</label>
             <Input
               id="expiresYear"
               name="expiresYear"
               type="text"
-              autoComplete="cc-exp-year"
               maxLength={4}
               placeholder="AAAA"
+              inputMode="numeric"
               value={formik.values.expiresYear}
-              onChange={formik.handleChange}
+              onChange={(e) =>
+                formik.setFieldValue('expiresYear', onlyNumbers(e.target.value))
+              }
               onBlur={formik.handleBlur}
               className={
                 formik.touched.expiresYear && formik.errors.expiresYear
@@ -207,7 +232,7 @@ const Payment = () => {
             {isLoading ? 'Finalizando...' : 'Finalizar pagamento'}
           </Button>
           <Button type="button" onClick={handleBack} disabled={isLoading}>
-            Voltar para a edição de endereço
+            Voltar para o endereço
           </Button>
         </ButtonGroup>
       </Form>

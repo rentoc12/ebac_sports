@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import { useAppDispatch, useAppSelector } from '../../store/hooks'
 import { resetCheckout, selectOrderId } from '../../store/reducers/cart'
 import { ConfirmationContainer, ConfirmationText, Button } from './styles'
@@ -5,9 +6,11 @@ import { ConfirmationContainer, ConfirmationText, Button } from './styles'
 const Confirmation = () => {
   const dispatch = useAppDispatch()
   const orderId = useAppSelector(selectOrderId)
+  const navigate = useNavigate()
 
   const handleFinish = () => {
     dispatch(resetCheckout())
+    navigate('/')
   }
 
   return (
